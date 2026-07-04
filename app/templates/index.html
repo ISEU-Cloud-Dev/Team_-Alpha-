@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener - Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { display: flex; height: 100vh; background-color: #f4f6f9; color: #333; }
+        
+        /* Sidebar */
+        .sidebar { width: 240px; background-color: #fff; border-right: 1px solid #e0e0e0; padding: 20px 0; display: flex; flex-direction: column; }
+        .logo-section { padding: 0 20px 20px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.2rem; }
+        .menu-list { list-style: none; margin-top: 20px; }
+        .menu-item { padding: 12px 20px; display: flex; align-items: center; gap: 12px; cursor: pointer; color: #555; transition: background 0.2s; }
+        .menu-item:hover, .menu-item.active { background-color: #e9ecef; color: #000; font-weight: 600; }
+        
+        /* Main Content */
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; }
+        .header { margin-bottom: 25px; }
+        .header h1 { font-size: 1.8rem; font-weight: 600; }
+        
+        /* KPI Cards */
+        .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 25px; }
+        .kpi-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; text-align: center; }
+        .kpi-title { font-size: 0.9rem; color: #666; margin-bottom: 5px; }
+        .kpi-value { font-size: 1.8rem; font-weight: bold; color: #111; }
+        
+        /* Charts Mockup Section */
+        .charts-container { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 25px; }
+        .chart-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; min-height: 220px; }
+        .chart-title { font-size: 1rem; font-weight: 600; margin-bottom: 15px; color: #444; }
+        .dummy-graph { width: 100%; height: 140px; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; color: #999; font-size: 0.9rem; background: #fafafa; }
+        
+        /* Table Section */
+        .table-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; }
+        th { background-color: #f8f9fa; color: #555; font-weight: 600; }
+        .actions-btn { background: none; border: none; cursor: pointer; margin-right: 8px; font-size: 1rem; }
+        .view-all-btn { display: block; width: max-content; margin: 15px 0 0 auto; padding: 8px 16px; background: #fff; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+        .view-all-btn:hover { background: #f8f9fa; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo-section">
+            🔗 URL Shortener
+        </div>
+        <ul class="menu-list">
+            <li class="menu-item active">🏠 Dashboard</li>
+            <li class="menu-item">🔗 Mis URLs</li>
+            <li class="menu-item">📊 Estadísticas</li>
+            <li class="menu-item">⚙️ Configuración</li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>Dashboard</h1>
+        </div>
+
+        <div class="kpi-container">
+            <div class="kpi-card">
+                <div class="kpi-title">🔗 Enlaces creados</div>
+                <div class="kpi-value">24</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">🖱️ Clicks totales</div>
+                <div class="kpi-value">1,256</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">✅ Enlaces activos</div>
+                <div class="kpi-value">18</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">📈 Clicks hoy</div>
+                <div class="kpi-value">89</div>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-card">
+                <div class="chart-title">Clicks por día (últimos 7 días)</div>
+                <div class="dummy-graph">[ Gráfico de Línea: Lun a Dom ]</div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Clicks por país</div>
+                <div class="dummy-graph">[ Gráfico de Pastel: México 45%, España 25%... ]</div>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <div class="table-header">
+                <h3>Tus URLs más recientes</h3>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>URL corta</th>
+                        <th>URL original</th>
+                        <th>Fecha de creación</th>
+                        <th>Clicks totales</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>short.ly/abc123</strong></td>
+                        <td>https://ejemplo.com/producto/123</td>
+                        <td>30/06/2026 10:00</td>
+                        <td>345</td>
+                        <td><button class="actions-btn">📊</button><button class="actions-btn">📋</button><button class="actions-btn">🗑️</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>short.ly/xyz789</strong></td>
+                        <td>https://miweb.com/landing</td>
+                        <td>29/06/2026 16:20</td>
+                        <td>212</td>
+                        <td><button class="actions-btn">📊</button><button class="actions-btn">📋</button><button class="actions-btn">🗑️</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>short.ly/def456</strong></td>
+                        <td>https://blog.com/articulo/top-10</td>
+                        <td>28/06/2026 09:15</td>
+                        <td>98</td>
+                        <td><button class="actions-btn">📊</button><button class="actions-btn">📋</button><button class="actions-btn">🗑️</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button class="view-all-btn">Ver todas mis URLs</button>
+        </div>
+    </div>
+
+</body>
+</html>
