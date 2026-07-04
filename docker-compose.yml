@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  # Servicio de la API (FastAPI)
+  web:
+    build: .
+    container_name: team-alpha-web
+    command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/code
+    depends_on:
+      - db
+      - redis
+
+  # Base de Datos (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: team-alpha-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=shortener_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Capa de Caché (Redis)
+  redis:
+    image: redis:7-alpine
+    container_name: team-alpha-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
