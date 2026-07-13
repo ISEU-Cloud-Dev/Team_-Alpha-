@@ -12,6 +12,8 @@ services:
       - "8000:8000"
     environment:
       - PYTHONPATH=/code
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/shortener_db
+      - REDIS_URL=redis://redis:6379/0
     depends_on:
       - db
       - redis
