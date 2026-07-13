@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import datetime, timedelta
-# Nota: Estas importaciones se activarán cuando Jorge (Dev 2) suba sus modelos
-# from app.models.link import Link
-# from app.models.visit import Visit
+
+from app.models.link import Link
+from app.models.visit import Visit
+
 
 class AnalyticsService:
     @staticmethod
@@ -11,34 +12,55 @@ class AnalyticsService:
         """
         Calcula y consolida las métricas globales para las gráficas del Dashboard.
         """
-        # 1. Obtener totales globales (Simulado mientras Jorge termina las tablas)
-        # total_links = db.query(Link).count()
-        # total_clicks = db.query(Link).with_entities(func.sum(Link.clicks)).scalar() or 0
-        total_links = 124  # Datos base de prueba (Mock)
-        total_clicks = 4850
+        # 1. Totales globales
+        total_links = db.query(Link).count()
+        total_clicks = db.query(func.sum(Link.clicks)).scalar() or 0
 
-        # 2. Clicks por día (Últimos 7 días)
+        # 2. Clicks por día (últimos 7 días), basado en la tabla visitas
         clicks_por_dia = []
-        hoy = datetime.utcnow()
+        hoy = datetime.utcnow().date()
         for i in range(6, -1, -1):
             dia = hoy - timedelta(days=i)
+            conteo = (
+                db.query(func.count(Visit.id))
+                .filter(func.date(Visit.fecha) == dia)
+                .scalar()
+                or 0
+            )
             clicks_por_dia.append({
                 "fecha": dia.strftime("%Y-%m-%d"),
-                "clicks": 500 + (i * 75)  # Mock de comportamiento
+                "clicks": conteo,
             })
 
-        # 3. Top Países con cálculo de porcentaje
+        # 3. Top países
+        paises_query = (
+            db.query(Visit.pais, func.count(Visit.id).label("clicks"))
+            .filter(Visit.pais.isnot(None))
+            .group_by(Visit.pais)
+            .order_by(func.count(Visit.id).desc())
+            .limit(5)
+            .all()
+        )
         top_paises = [
-            {"pais": "México", "clicks": 2500, "porcentaje": round((2500 / total_clicks) * 100, 2)},
-            {"pais": "Estados Unidos", "clicks": 1350, "porcentaje": round((1350 / total_clicks) * 100, 2)},
-            {"pais": "Colombia", "clicks": 1000, "porcentaje": round((1000 / total_clicks) * 100, 2)}
+            {
+                "pais": pais,
+                "clicks": clicks,
+                "porcentaje": round((clicks / total_clicks) * 100, 2) if total_clicks else 0,
+            }
+            for pais, clicks in paises_query
         ]
 
-        # 4. Distribución por Dispositivo
+        # 4. Top dispositivos
+        dispositivos_query = (
+            db.query(Visit.dispositivo, func.count(Visit.id).label("clicks"))
+            .filter(Visit.dispositivo.isnot(None))
+            .group_by(Visit.dispositivo)
+            .order_by(func.count(Visit.id).desc())
+            .all()
+        )
         top_dispositivos = [
-            {"dispositivo": "Mobile", "clicks": 3100},
-            {"dispositivo": "Desktop", "clicks": 1500},
-            {"dispositivo": "Tablet", "clicks": 250}
+            {"dispositivo": dispositivo, "clicks": clicks}
+            for dispositivo, clicks in dispositivos_query
         ]
 
         return {
@@ -46,5 +68,5 @@ class AnalyticsService:
             "total_clicks_globales": total_clicks,
             "clicks_por_dia": clicks_por_dia,
             "top_paises": top_paises,
-            "top_dispositivos": top_dispositivos
+            "top_dispositivos": top_dispositivos,
         }
