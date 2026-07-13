@@ -38,6 +38,7 @@ from app.core.database import SessionLocal
 from app.core.redis_cache import get_cached_url, set_cached_url
 from app.api.services.geo_ip import get_country_from_ip, parse_user_agent
 from app.models.link import Link
+from app.models.visit import Visit
 
 logger = logging.getLogger("redirect_endpoint")
 
@@ -87,26 +88,33 @@ def despachar_metadata_visita(
 ) -> None:
     """
     Tarea que corre en segundo plano (no bloquea la redirección al usuario).
-
-    Por ahora solo deja un log estructurado con toda la metadata calculada.
-    Dev 2 debe reemplazar/ampliar el cuerpo de esta función con el INSERT
-    real hacia la tabla `visitas` (app/models/visit.py), agregando las
-    columnas que hagan falta (pais, dispositivo, navegador) vía migración.
+    Inserta la metadata de la visita en la tabla `visitas` y actualiza
+    el contador de clicks del link correspondiente.
     """
-    metadata_visita = {
-        "url_id": url_id,
-        "codigo": codigo,
-        "ip_usuario": ip,
-        "pais": pais,
-        "dispositivo": dispositivo,
-        "navegador": navegador,
-        "fecha": datetime.now(timezone.utc).isoformat(),
-    }
-    # TODO (Dev 2): Insertar `metadata_visita` en la tabla `visitas` aquí,
-    # usando una sesión propia de SessionLocal (igual que en
-    # _buscar_link_en_postgres) para no compartir sesión con el request.
-    logger.info("Visita registrada (pendiente de persistir): %s", metadata_visita)
+    db = SessionLocal()
+    try:
+        nueva_visita = Visit(
+            url_id=url_id,
+            ip_usuario=ip,
+            pais=pais,
+            dispositivo=dispositivo,
+            navegador=navegador,
+        )
+        db.add(nueva_visita)
 
+        # Incrementa el contador de clicks del link asociado
+        if url_id is not None:
+            link = db.query(Link).filter(Link.id == url_id).first()
+            if link:
+                link.clicks = (link.clicks or 0) + 1
+
+        db.commit()
+        logger.info("Visita registrada en BD: url_id=%s, codigo=%s", url_id, codigo)
+    except Exception as exc:
+        db.rollback()
+        logger.error("Error al guardar visita en BD (codigo=%s): %s", codigo, exc)
+    finally:
+        db.close()
 
 @router.get(
     "/{codigo}",
