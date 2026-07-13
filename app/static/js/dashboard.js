@@ -188,3 +188,92 @@ function dibujarPieChart(containerId, datos) {
 
 cargarDashboard();
 cargarUrls();
+// --- Cambio de vista (Dashboard / Mis URLs / Estadísticas) ---
+function cambiarVista(vista) {
+    document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+    document.getElementById(`view-${vista}`).style.display = 'block';
+
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.view === vista);
+    });
+
+    if (vista === 'urls') cargarUrlsCompleto();
+    if (vista === 'stats') cargarEstadisticas();
+}
+
+document.querySelectorAll('.menu-item').forEach(item => {
+    item.addEventListener('click', () => cambiarVista(item.dataset.view));
+});
+
+// --- Vista: Mis URLs (tabla completa) ---
+async function cargarUrlsCompleto() {
+    try {
+        const res = await fetch('/api/v1/shorten/');
+        const links = await res.json();
+        const tbody = document.getElementById('tabla-urls-full-body');
+
+        if (links.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Aún no hay URLs creadas.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = links.map(link => `
+            <tr>
+                <td><span class="badge-corto">${link.url_corta}</span></td>
+                <td><span class="url-larga" title="${link.url_larga}">${link.url_larga}</span></td>
+                <td>${link.fecha_creacion}</td>
+                <td>${link.clicks}</td>
+                <td>
+                    <button class="action-btn" onclick="copiarUrl('${link.url_corta}')">Copiar</button>
+                    <button class="action-btn action-btn-danger" onclick="eliminarUrlCompleto(${link.id})">Eliminar</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        console.error('Error cargando URLs:', err);
+    }
+}
+
+async function eliminarUrlCompleto(id) {
+    if (!confirm('¿Eliminar este enlace? Esta acción no se puede deshacer.')) return;
+    try {
+        const res = await fetch(`/api/v1/shorten/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Error al eliminar');
+        cargarUrlsCompleto();
+        cargarDashboard();
+    } catch (err) {
+        console.error('Error eliminando URL:', err);
+        alert('No se pudo eliminar el enlace.');
+    }
+}
+
+// --- Vista: Estadísticas ---
+async function cargarEstadisticas() {
+    try {
+        const res = await fetch('/api/v1/dashboard/');
+        const data = await res.json();
+
+        document.getElementById('stats-kpi-clicks').textContent = data.total_clicks_globales;
+        document.getElementById('stats-kpi-pais').textContent =
+            data.top_paises.length > 0 ? data.top_paises[0].pais : '—';
+        document.getElementById('stats-kpi-dispositivo').textContent =
+            data.top_dispositivos.length > 0 ? data.top_dispositivos[0].dispositivo : '—';
+
+        dibujarLineChart('stats-grafico-dia', data.clicks_por_dia);
+        dibujarPieChart('stats-grafico-paises', data.top_paises);
+
+        const tbody = document.getElementById('tabla-dispositivos-body');
+        if (data.top_dispositivos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="2" class="empty-state">Sin datos aún.</td></tr>';
+        } else {
+            tbody.innerHTML = data.top_dispositivos.map(d => `
+                <tr>
+                    <td>${d.dispositivo}</td>
+                    <td>${d.clicks}</td>
+                </tr>
+            `).join('');
+        }
+    } catch (err) {
+        console.error('Error cargando estadísticas:', err);
+    }
+}
