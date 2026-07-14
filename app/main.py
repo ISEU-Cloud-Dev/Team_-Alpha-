@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.requests import Request
 from app.api.router import api_router
+from app.api.endpoints import redirect as redirect_endpoint
 from app.core.config import settings
 
 app = FastAPI(
@@ -16,6 +17,9 @@ templates = Jinja2Templates(directory="app/templates")
 
 # Montar carpeta de archivos estáticos (CSS, JS)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+# Redirección de códigos cortos en la raíz: GET localhost:8000/{codigo}
+app.include_router(redirect_endpoint.router, tags=["Redirection"])
 
 # Incluir el enrutador central de la API
 app.include_router(api_router, prefix=settings.API_V1_STR)

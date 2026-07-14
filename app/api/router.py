@@ -1,11 +1,11 @@
 from fastapi import APIRouter
-from app.api.endpoints import shorten, redirect, dashboard
+from app.api.endpoints import shorten, dashboard
 
 api_router = APIRouter()
 
-# Endpoint para el Desarrollador 3 (Redirección inmediata en la raíz)
-# Nota: Como GET /{codigo} va en la raíz, se monta directo o en su router respectivo
-api_router.include_router(redirect.router, tags=["Redirection"])
+# Nota: el router de redirección (GET /{codigo}) YA NO se monta aquí.
+# Iba con prefijo /api/v1 por error, cuando debe vivir en la raíz
+# (localhost:8000/{codigo}). Se monta directo en app/main.py.
 
 # Endpoint para el Desarrollador 1 (Generar URLs cortas)
 api_router.include_router(shorten.router, prefix="/shorten", tags=["Shorten"])
