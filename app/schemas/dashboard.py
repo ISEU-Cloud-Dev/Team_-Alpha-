@@ -15,6 +15,7 @@ class DeviceMetric(BaseModel):
     clicks: int
 
 class DashboardAnalyticsResponse(BaseModel):
+    total_links_creados: int
     total_links_activos: int
     total_clicks_globales: int
     clicks_por_dia: List[ClickChronology]

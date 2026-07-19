@@ -12,8 +12,14 @@ from app.core.redis_cache import set_cached_url
 router = APIRouter()
 
 
+@router.post("", response_model=LinkResponse)
 @router.post("/", response_model=LinkResponse)
-async def crear_link_corto(payload: LinkCreate, db: Session = Depends(get_db)):
+async def crear_link_corto(payload: LinkCreate | None = None, db: Session = Depends(get_db), url_larga: str | None = None):
+    if payload is None:
+        if not url_larga:
+            raise HTTPException(status_code=422, detail="Se requiere url_larga")
+        payload = LinkCreate(url_larga=url_larga)
+
     codigo = generar_codigo_unico(db)
 
     nuevo_link = Link(

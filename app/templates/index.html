@@ -21,143 +21,164 @@
 
     <div class="main-content">
 
-    <!-- VISTA: DASHBOARD -->
-    <div class="view" id="view-dashboard">
-        <div class="header">
-            <div>
-                <h1>Dashboard</h1>
-                <p>Resumen general de tus enlaces acortados</p>
+        <!-- VISTA: DASHBOARD -->
+        <div class="view" id="view-dashboard">
+            <div class="header">
+                <div>
+                    <h1>Dashboard</h1>
+                    <p>Resumen general de tus enlaces acortados</p>
+                </div>
+            </div>
+
+            <!-- SECCIÓN NUEVA: FORMULARIO PARA CREAR LINKS -->
+            <div class="shortener-card">
+                <h3>Acortar una nueva URL</h3>
+                <form id="form-shorten" class="shortener-form">
+                    <input 
+                        type="url" 
+                        id="input-long-url" 
+                        placeholder="Pega tu enlace largo aquí (ej. https://google.com)..." 
+                        required
+                    >
+                    <button type="submit">Acortar</button>
+                </form>
+                <div id="shorten-result" style="display: none; margin-top: 15px;">
+                    <p>¡Listo! Tu enlace corto es:</p>
+                    <div class="result-box">
+                        <input type="text" id="output-short-url" readonly>
+                        <button type="button" id="btn-copy">Copiar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kpi-container">
+                <div class="kpi-card">
+                    <div class="kpi-title">Enlaces creados</div>
+                    <div class="kpi-value" id="kpi-links">--</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Clicks totales</div>
+                    <div class="kpi-value" id="kpi-clicks">--</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Enlaces activos</div>
+                    <div class="kpi-value" id="kpi-activos">--</div>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-title">Clicks por día (últimos 7 días)</div>
+                    <div class="chart-canvas-wrap" id="grafico-clicks-dia"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Clicks por país</div>
+                    <div class="chart-canvas-wrap" id="grafico-paises"></div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>Tus URLs recientes</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>URL corta</th>
+                            <th>URL original</th>
+                            <th>Fecha de creación</th>
+                            <th>Clicks totales</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-urls-body">
+                        <tr><td colspan="5" class="empty-state">Cargando...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="kpi-container">
-            <div class="kpi-card">
-                <div class="kpi-title">Enlaces creados</div>
-                <div class="kpi-value" id="kpi-links">--</div>
+        <!-- VISTA: MIS URLS -->
+        <div class="view" id="view-urls" style="display:none;">
+            <div class="header">
+                <div>
+                    <h1>Mis URLs</h1>
+                    <p>Todos tus enlaces acortados</p>
+                </div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-title">Clicks totales</div>
-                <div class="kpi-value" id="kpi-clicks">--</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-title">Enlaces activos</div>
-                <div class="kpi-value" id="kpi-activos">--</div>
+
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>URL corta</th>
+                            <th>URL original</th>
+                            <th>Fecha de creación</th>
+                            <th>Clicks totales</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-urls-full-body">
+                        <tr><td colspan="5" class="empty-state">Cargando...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="charts-container">
-            <div class="chart-card">
-                <div class="chart-title">Clicks por día (últimos 7 días)</div>
-                <div class="chart-canvas-wrap" id="grafico-clicks-dia"></div>
+        <!-- VISTA: ESTADÍSTICAS -->
+        <div class="view" id="view-stats" style="display:none;">
+            <div class="header">
+                <div>
+                    <h1>Estadísticas</h1>
+                    <p>Análisis detallado de clicks, países y dispositivos</p>
+                </div>
             </div>
-            <div class="chart-card">
-                <div class="chart-title">Clicks por país</div>
-                <div class="chart-canvas-wrap" id="grafico-paises"></div>
+
+            <div class="kpi-container">
+                <div class="kpi-card">
+                    <div class="kpi-title">Clicks totales</div>
+                    <div class="kpi-value" id="stats-kpi-clicks">--</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Top país</div>
+                    <div class="kpi-value" id="stats-kpi-pais">--</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Top dispositivo</div>
+                    <div class="kpi-value" id="stats-kpi-dispositivo">--</div>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-title">Clicks por día (últimos 7 días)</div>
+                    <div class="chart-canvas-wrap" id="stats-grafico-dia" style="height:280px;"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Clicks por país</div>
+                    <div class="chart-canvas-wrap" id="stats-grafico-paises" style="height:280px;"></div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>Distribución por dispositivo</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Dispositivo</th>
+                            <th>Clicks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-dispositivos-body">
+                        <tr><td colspan="2" class="empty-state">Cargando...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="table-card">
-            <div class="table-header">
-                <h3>Tus URLs recientes</h3>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>URL corta</th>
-                        <th>URL original</th>
-                        <th>Fecha de creación</th>
-                        <th>Clicks totales</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-urls-body">
-                    <tr><td colspan="5" class="empty-state">Cargando...</td></tr>
-                </tbody>
-            </table>
-        </div>
     </div>
-
-    <!-- VISTA: MIS URLS -->
-    <div class="view" id="view-urls" style="display:none;">
-        <div class="header">
-            <div>
-                <h1>Mis URLs</h1>
-                <p>Todos tus enlaces acortados</p>
-            </div>
-        </div>
-
-        <div class="table-card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>URL corta</th>
-                        <th>URL original</th>
-                        <th>Fecha de creación</th>
-                        <th>Clicks totales</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-urls-full-body">
-                    <tr><td colspan="5" class="empty-state">Cargando...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- VISTA: ESTADÍSTICAS -->
-    <div class="view" id="view-stats" style="display:none;">
-        <div class="header">
-            <div>
-                <h1>Estadísticas</h1>
-                <p>Análisis detallado de clicks, países y dispositivos</p>
-            </div>
-        </div>
-
-        <div class="kpi-container">
-            <div class="kpi-card">
-                <div class="kpi-title">Clicks totales</div>
-                <div class="kpi-value" id="stats-kpi-clicks">--</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-title">Top país</div>
-                <div class="kpi-value" id="stats-kpi-pais">--</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-title">Top dispositivo</div>
-                <div class="kpi-value" id="stats-kpi-dispositivo">--</div>
-            </div>
-        </div>
-
-        <div class="charts-container">
-            <div class="chart-card">
-                <div class="chart-title">Clicks por día (últimos 7 días)</div>
-                <div class="chart-canvas-wrap" id="stats-grafico-dia" style="height:280px;"></div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-title">Clicks por país</div>
-                <div class="chart-canvas-wrap" id="stats-grafico-paises" style="height:280px;"></div>
-            </div>
-        </div>
-
-        <div class="table-card">
-            <div class="table-header">
-                <h3>Distribución por dispositivo</h3>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Dispositivo</th>
-                        <th>Clicks</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-dispositivos-body">
-                    <tr><td colspan="2" class="empty-state">Cargando...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-</div>
 
     <script src="/static/js/dashboard.js"></script>
 </body>
