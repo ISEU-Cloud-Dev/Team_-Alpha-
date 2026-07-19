@@ -13,7 +13,8 @@ class AnalyticsService:
         Calcula y consolida las métricas globales para las gráficas del Dashboard.
         """
         # 1. Totales globales
-        total_links = db.query(Link).count()
+        total_links_creados = db.query(Link).count()
+        total_links_activos = db.query(Link).filter(Link.clicks >= 0).count()
         total_clicks = db.query(func.sum(Link.clicks)).scalar() or 0
 
         # 2. Clicks por día (últimos 7 días), basado en la tabla visitas
@@ -64,7 +65,8 @@ class AnalyticsService:
         ]
 
         return {
-            "total_links_activos": total_links,
+            "total_links_creados": total_links_creados,
+            "total_links_activos": total_links_activos,
             "total_clicks_globales": total_clicks,
             "clicks_por_dia": clicks_por_dia,
             "top_paises": top_paises,

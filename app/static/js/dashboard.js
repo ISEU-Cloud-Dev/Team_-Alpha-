@@ -3,7 +3,7 @@ async function cargarDashboard() {
         const res = await fetch('/api/v1/dashboard/');
         const data = await res.json();
 
-        document.getElementById('kpi-links').textContent = data.total_links_activos;
+        document.getElementById('kpi-links').textContent = data.total_links_creados;
         document.getElementById('kpi-clicks').textContent = data.total_clicks_globales;
         document.getElementById('kpi-activos').textContent = data.total_links_activos;
         dibujarLineChart('grafico-clicks-dia', data.clicks_por_dia);
@@ -42,7 +42,7 @@ async function cargarUrls() {
 }
 
 function copiarUrl(codigo) {
-    const url = `${window.location.origin}/api/v1/${codigo}`;
+    const url = `${window.location.origin}/${codigo}`;
     navigator.clipboard.writeText(url).then(() => {
         alert('Enlace copiado: ' + url);
     });
@@ -277,3 +277,70 @@ async function cargarEstadisticas() {
         console.error('Error cargando estadísticas:', err);
     }
 }
+// --- Lógica para Acortar Nueva URL ---
+document.getElementById('form-shorten').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const inputLongUrl = document.getElementById('input-long-url');
+    const resultDiv = document.getElementById('shorten-result');
+    const outputShortUrl = document.getElementById('output-short-url');
+    
+    const urlLarga = inputLongUrl.value.trim();
+    if (!urlLarga) return;
+
+    try {
+        // Apuntamos al endpoint correcto según tus rutas de consulta (/api/v1/shorten/)
+        const res = await fetch('/api/v1/shorten/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ url_larga: urlLarga })
+        });
+
+        if (!res.ok) throw new Error('Error al acortar la URL');
+        
+        const data = await res.json();
+        
+        // Construimos la URL corta usando la ruta de redirección raíz
+        const urlCortaCompleta = `${window.location.origin}/${data.url_corta}`;
+        
+        // Mostramos el resultado en la UI
+        outputShortUrl.value = urlCortaCompleta;
+        resultDiv.style.display = 'block';
+        
+        // Limpiamos el input para el siguiente enlace
+        inputLongUrl.value = '';
+        
+        // Forzamos la actualización inmediata del Dashboard y las tablas sin recargar la página
+        cargarDashboard();
+        cargarUrls();
+        
+    } catch (err) {
+        console.error('Error al acortar URL:', err);
+        alert('Hubo un problema al procesar tu enlace. Revisa la consola o los logs del contenedor.');
+    }
+});
+
+// Lógica para el botón de copiado rápido
+document.getElementById('btn-copy').addEventListener('click', () => {
+    const outputShortUrl = document.getElementById('output-short-url');
+    const urlParaCopiar = outputShortUrl.value.trim();
+
+    if (!urlParaCopiar) return;
+
+    outputShortUrl.select();
+    navigator.clipboard.writeText(urlParaCopiar).then(() => {
+        const btn = document.getElementById('btn-copy');
+        const textOriginal = btn.textContent;
+        btn.textContent = '¡Copiado!';
+        btn.style.background = '#10b981';
+
+        setTimeout(() => {
+            btn.textContent = textOriginal;
+            btn.style.background = '';
+        }, 2000);
+    }).catch(() => {
+        alert('No se pudo copiar el enlace.');
+    });
+});

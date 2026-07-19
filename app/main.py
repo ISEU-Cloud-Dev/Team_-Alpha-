@@ -1,32 +1,38 @@
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.requests import Request
+from fastapi.templating import Jinja2Templates
 from app.api.router import api_router
-from app.api.endpoints import redirect as redirect_endpoint
-from app.core.config import settings
+from app.api.endpoints.redirect import router as redirect_router
+from app.core.database import engine
+from app.models.link import Base as LinkBase
+from app.models.visit import Base as VisitBase
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version="1.0.0",
-)
+# Inicialización de las tablas de la base de datos
+LinkBase.metadata.create_all(bind=engine)
+VisitBase.metadata.create_all(bind=engine)
 
-# Configurar el motor de plantillas para renderizar la UI
-templates = Jinja2Templates(directory="app/templates")
+app = FastAPI(title="Alpha URL Shortener API", version="1.0.0")
 
-# Montar carpeta de archivos estáticos (CSS, JS)
+# 1. Montar archivos estáticos (CSS, JS, imágenes)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
-# Redirección de códigos cortos en la raíz: GET localhost:8000/{codigo}
-app.include_router(redirect_endpoint.router, tags=["Redirection"])
+# Configurar motor de plantillas HTML
+templates = Jinja2Templates(directory="app/templates")
 
-# Incluir el enrutador central de la API
-app.include_router(api_router, prefix=settings.API_V1_STR)
-
-@app.get("/", response_class=HTMLResponse, tags=["UI"])
+# 2. Ruta para ver la interfaz gráfica completa
+@app.get("/dashboard")
 def render_dashboard(request: Request):
+    # Pasamos 'request' primero, seguido de la plantilla y el contexto
     return templates.TemplateResponse(
         request=request,
-        name="index.html"
+        name="index.html",
+        context={"request": request}
     )
+
+# Rutas de la API
+app.include_router(api_router, prefix="/api/v1")
+app.include_router(redirect_router)
+
+@app.get("/")
+def read_root():
+    return {"status": "ok", "project": "Team Alpha Shortener"}
